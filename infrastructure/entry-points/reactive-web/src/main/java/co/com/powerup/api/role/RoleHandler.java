@@ -43,9 +43,9 @@ public class RoleHandler {
             .map(roleDTOMapper::toModel)              
             .flatMap(roleUseCase::saveRole)  
             .map(roleDTOMapper::toResponse)         
-            .flatMap(user -> ServerResponse.ok()
+            .flatMap(role -> ServerResponse.ok()
                     .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(user))
+                    .bodyValue(role))
             .onErrorResume(e -> ServerResponse.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(Map.of("error", e.getMessage())));    
