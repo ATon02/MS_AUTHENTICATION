@@ -10,6 +10,6 @@ import co.com.powerup.model.role.Role;
 public interface RoleDTOMapper {
 
     RoleResponse toResponse(Role role);
-    Role toModel(RoleCreateDTO userCreateDTO);
+    Role toModel(RoleCreateDTO roleCreateDTO);
 
 }
