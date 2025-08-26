@@ -13,7 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class UserReponse {
+public class UserResponse {
+
     private Long idUser;
     private String name;
     private String lastName;

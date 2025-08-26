@@ -27,8 +27,6 @@ class RoleUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         validRole = new Role();
         validRole.setName("ADMIN");
         validRole.setDescription("Administrador del sistema");

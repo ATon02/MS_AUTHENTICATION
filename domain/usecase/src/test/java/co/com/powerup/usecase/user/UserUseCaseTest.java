@@ -29,7 +29,6 @@ class UserUseCaseTest {
 
     @BeforeEach
     void setUp() {
-
         validUser = new User();
         validUser.setName("Anderson");
         validUser.setLastName("Tonusco");
@@ -55,15 +54,19 @@ class UserUseCaseTest {
 
     @Test
     void saveUser_whenNameIsNull_shouldReturnError() {
-        validUser.setName(null);
+         User user = new User();
+        user.setName(null);
+        user.setLastName("Tonusco");
+        user.setEmail("anderson@example.com");
+        user.setBaseSalary(5000.0);
 
-        StepVerifier.create(userUseCase.saveUser(validUser))
+        StepVerifier.create(userUseCase.saveUser(user))
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
                         throwable.getMessage().equals("El campo 'name' es obligatorio"))
                 .verify();
 
         verify(userRepository, never()).saveTransactional(any());
-    }
+}
 
     @Test
     void saveUser_whenLastNameIsNull_shouldReturnError() {
