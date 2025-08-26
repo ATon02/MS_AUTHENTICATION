@@ -66,7 +66,19 @@ class UserUseCaseTest {
                 .verify();
 
         verify(userRepository, never()).saveTransactional(any());
-}
+    }
+
+    @Test
+    void saveUser_whenNameIsBlank_shouldReturnError() {
+        validUser.setName("");
+
+        StepVerifier.create(userUseCase.saveUser(validUser))
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("El campo 'name' es obligatorio"))
+                .verify();
+
+        verify(userRepository, never()).saveTransactional(any());
+    }
 
     @Test
     void saveUser_whenLastNameIsNull_shouldReturnError() {
@@ -81,8 +93,32 @@ class UserUseCaseTest {
     }
 
     @Test
+    void saveUser_whenLastNameIsBlank_shouldReturnError() {
+        validUser.setLastName("");
+
+        StepVerifier.create(userUseCase.saveUser(validUser))
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("El campo 'lastName' es obligatorio"))
+                .verify();
+
+        verify(userRepository, never()).saveTransactional(any());
+    }
+
+    @Test
     void saveUser_whenEmailIsNull_shouldReturnError() {
         validUser.setEmail(null);
+
+        StepVerifier.create(userUseCase.saveUser(validUser))
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
+                        throwable.getMessage().equals("El campo 'email' es obligatorio"))
+                .verify();
+
+        verify(userRepository, never()).saveTransactional(any());
+    }
+
+    @Test
+    void saveUser_whenEmailIsBlank_shouldReturnError() {
+        validUser.setEmail("");
 
         StepVerifier.create(userUseCase.saveUser(validUser))
                 .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException &&
