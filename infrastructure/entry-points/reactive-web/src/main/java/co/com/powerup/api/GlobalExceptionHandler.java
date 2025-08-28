@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
                     ErrorResponse errorResponse = ErrorResponse.builder()
                             .status(status.value())
                             .message(error.getMessage())
-                            .path(request.path())
+                            .path(request.toString())
                             .timestamp(LocalDateTime.now())
                             .build();
 
