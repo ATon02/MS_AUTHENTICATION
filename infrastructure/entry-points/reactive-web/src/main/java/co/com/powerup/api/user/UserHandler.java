@@ -44,4 +44,16 @@ public class UserHandler {
                         .bodyValue(savedUser));
     }
 
+    public Mono<ServerResponse> saveUserAdmin(ServerRequest serverRequest) {
+        log.info("➡️ Ejecutando saveUserAdmin() de UserHandler");
+        return serverRequest.bodyToMono(UserCreateDTO.class)
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("El body no puede ser null")))
+                .map(userDTOMapper::toModel)
+                .flatMap(userUseCase::saveUserAdmin)
+                .map(userDTOMapper::toResponse) 
+                .flatMap(savedUser -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(savedUser));
+    }
+
 }

@@ -13,5 +13,6 @@ public record UserCreateDTO(
     String phone,
     String email,
     Double baseSalary,
-    Long roleId
+    Long roleId,
+    String password
 ) {}

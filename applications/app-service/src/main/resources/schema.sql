@@ -14,5 +14,6 @@ CREATE TABLE IF NOT EXISTS users (
     role_id INTEGER NULL REFERENCES roles(id),
     base_salary DOUBLE PRECISION NOT NULL CHECK (base_salary >= 0 AND base_salary <= 15000000),
     date_of_birth DATE NULL,
+    password VARCHAR(255) NOT NULL,
     address VARCHAR(255) NULL
 );

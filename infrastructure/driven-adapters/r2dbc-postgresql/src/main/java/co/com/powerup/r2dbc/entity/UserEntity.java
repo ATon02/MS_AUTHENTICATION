@@ -26,4 +26,5 @@ public class UserEntity {
     private Double baseSalary;
     private LocalDate dateOfBirth;
     private String address;
+    private String password;
 }
