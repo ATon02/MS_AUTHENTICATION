@@ -17,7 +17,10 @@ import java.util.List;
 public class RoleRouter {
     @Bean
     public RouterFunction<ServerResponse> roleRouterFunction(RoleHandler roleHandler, JwtAuthenticationFilter filter) {
-        return route(GET("/api/v1/roles"), roleHandler::find).filter(filter.requireRole(List.of("admin")))
-                .andRoute(POST("/api/v1/roles"), roleHandler::saveRole).filter(filter.requireRole(List.of("admin")));
+        RouterFunction<ServerResponse> find = route(GET("/api/v1/roles"), roleHandler::find)
+                .filter(filter.requireRole(List.of("admin")));
+        RouterFunction<ServerResponse> save = route(POST("/api/v1/roles"), roleHandler::saveRole)
+                .filter(filter.requireRole(List.of("admin")));
+        return find.and(save);
     }
 }

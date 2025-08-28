@@ -17,8 +17,12 @@ import java.util.List;
 public class UserRouter {
     @Bean
     public RouterFunction<ServerResponse> userRouterFunction(UserHandler userhandler, JwtAuthenticationFilter filter) {
-        return route(GET("/api/v1/users"), userhandler::find).filter(filter.requireRole(List.of("admin","asesor"))) 
-                .andRoute(POST("/api/v1/users"), userhandler::saveUser).filter(filter.requireRole(List.of("admin","asesor")))
-                .andRoute(POST("/api/v1/users/admin"), userhandler::saveUserAdmin).filter(filter.requireRole(List.of("admin")));
+        RouterFunction<ServerResponse> find = route(GET("/api/v1/users"), userhandler::find)
+                .filter(filter.requireRole(List.of("admin","asesor")));
+        RouterFunction<ServerResponse> save = route(POST("/api/v1/users"), userhandler::saveUser)
+                .filter(filter.requireRole(List.of("admin")));
+        RouterFunction<ServerResponse> saveAdmin = route(POST("/api/v1/users/admin"), userhandler::saveUserAdmin)
+                .filter(filter.requireRole(List.of("admin")));
+        return find.and(save).and(saveAdmin);
     }
 }
