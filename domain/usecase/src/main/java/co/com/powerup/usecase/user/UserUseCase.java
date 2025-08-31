@@ -17,13 +17,11 @@ public class UserUseCase implements IUserUseCase {
 
     @Override
     public Mono<User> saveUser(User user) {
-        System.out.println("➡️ Ejecutando saveUser de UserUseCase con el user: " + user.toString());
+        System.out.println("➡️ Ejecutando saveUser con user: " + user);
         user.setRoleId(3L);
         return validUser(user)
-                .flatMap(userSave -> userRepository.findByEmail(userSave.getEmail())
-                        .flatMap(existing -> Mono
-                                .<User>error(new IllegalArgumentException("El correo ya está registrado")))
-                        .switchIfEmpty(userRepository.saveTransactional(userSave)));
+                .flatMap(userSave -> validateEmailNotExists(userSave)
+                        .flatMap(u -> userRepository.saveTransactional(u)));
     }
 
     @Override
@@ -33,11 +31,20 @@ public class UserUseCase implements IUserUseCase {
 
     @Override
     public Mono<User> saveUserAdmin(User user) {
+        System.out.println("➡️ Ejecutando saveUserAdmin con user: " + user);
         return validUser(user)
-                .flatMap(userSave -> roleRepository.findById(userSave.getRoleId())
-                        .switchIfEmpty(Mono
-                                .error(new IllegalArgumentException("El rol con id " + userSave.getRoleId() + " no existe")))
-                        .flatMap(roleExist -> userRepository.saveTransactional(userSave)));
+                .flatMap(userSave -> validateEmailNotExists(userSave)
+                        .flatMap(u -> roleRepository.findById(u.getRoleId())
+                                .switchIfEmpty(Mono.error(new IllegalArgumentException(
+                                        "El rol con id " + u.getRoleId() + " no existe")))
+                                .flatMap(roleExist -> userRepository.saveTransactional(u))));
+    }
+
+    private Mono<User> validateEmailNotExists(User user) {
+        return userRepository.findByEmail(user.getEmail())
+                .flatMap(existing -> Mono.<User>error(
+                        new IllegalArgumentException("El correo ya está registrado")))
+                .switchIfEmpty(Mono.just(user));
     }
 
     private Mono<User> validUser(User user) {
@@ -56,8 +63,7 @@ public class UserUseCase implements IUserUseCase {
                         return Mono.error(new IllegalArgumentException("El campo 'baseSalary' es obligatorio"));
                     }
                     if (userSave.getBaseSalary() < 0 || userSave.getBaseSalary() > 15_000_000) {
-                        return Mono
-                                .error(new IllegalArgumentException("El salario base debe estar entre 0 y 15.000.000"));
+                        return Mono.error(new IllegalArgumentException("El salario base debe estar entre 0 y 15.000.000"));
                     }
                     if (!userSave.getEmail().matches("^[\\w-.]+@[\\w-]+\\.[a-z]{2,}$")) {
                         return Mono.error(new IllegalArgumentException("El email tiene un formato inválido"));
