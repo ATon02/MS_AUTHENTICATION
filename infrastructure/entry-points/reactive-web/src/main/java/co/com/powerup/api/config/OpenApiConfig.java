@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.media.IntegerSchema;
 import io.swagger.v3.oas.models.media.NumberSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.media.StringSchema;
+import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
@@ -87,7 +88,6 @@ public class OpenApiConfig {
                                                             new io.swagger.v3.oas.models.media.MediaType()
                                                                     .schema(new Schema<>().$ref(
                                                                             "#/components/schemas/RoleResponse")))))));
-
             openApi.path("/api/v1/roles", rolePath);
             // PATHS DE USUARIOS
             PathItem userPath = new PathItem()
@@ -126,8 +126,30 @@ public class OpenApiConfig {
                                                             new io.swagger.v3.oas.models.media.MediaType()
                                                                     .schema(new Schema<>().$ref(
                                                                             "#/components/schemas/UserResponse")))))));
-
             openApi.path("/api/v1/users", userPath);
+            PathItem userFindByEmailPath = new PathItem()
+                    .get(new Operation()
+                            .operationId("findUserByEmail")
+                            .tags(List.of("User"))
+                            .summary("Obtiene un usuario por su email")
+                            .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                            .parameters(List.of(
+                                    new Parameter()
+                                            .name("email")
+                                            .in("query")
+                                            .description("Email del usuario a buscar")
+                                            .required(true)
+                                            .schema(new StringSchema())
+                            ))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Usuario encontrado")
+                                            .content(new Content()
+                                                    .addMediaType("application/json",
+                                                            new io.swagger.v3.oas.models.media.MediaType()
+                                                                    .schema(new Schema<>().$ref(
+                                                                            "#/components/schemas/UserResponse")))))));  
+            openApi.path("/api/v1/users/find-by-email", userFindByEmailPath);                                         
             // PATHS DE AUTH
             PathItem loginPath = new PathItem()
                     .post(new Operation()

@@ -9,5 +9,6 @@ public interface IUserUseCase {
     Mono<User> saveUser(User user);
     Mono<User> saveUserAdmin(User user);
     Flux<User> findAll();
+    Mono<User> findByEmail(String email);
 
 }

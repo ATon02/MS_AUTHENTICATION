@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Component
@@ -69,6 +70,8 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
             return HttpStatus.UNAUTHORIZED;
         } else if (error instanceof ForbiddenException) {
             return HttpStatus.FORBIDDEN;
+        }else if (error instanceof NoSuchElementException) {
+            return HttpStatus.NOT_FOUND;
         } else {
             return HttpStatus.INTERNAL_SERVER_ERROR;
         }

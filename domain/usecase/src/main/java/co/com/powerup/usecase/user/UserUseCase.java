@@ -1,5 +1,7 @@
 package co.com.powerup.usecase.user;
 
+import java.util.NoSuchElementException;
+
 import co.com.powerup.model.role.gateways.RoleRepository;
 import co.com.powerup.model.user.User;
 import co.com.powerup.model.user.gateways.UserRepository;
@@ -38,6 +40,18 @@ public class UserUseCase implements IUserUseCase {
                                 .switchIfEmpty(Mono.error(new IllegalArgumentException(
                                         "El rol con id " + u.getRoleId() + " no existe")))
                                 .flatMap(roleExist -> userRepository.saveTransactional(u))));
+    }
+
+    @Override
+    public Mono<User> findByEmail(String email) {
+        if (email == null || email.isBlank()) {
+            return Mono.error(new IllegalArgumentException("El campo 'email' es obligatorio"));
+        }
+        if (!email.matches("^[\\w-.]+@[\\w-]+\\.[a-z]{2,}$")) {
+            return Mono.error(new IllegalArgumentException("El email tiene un formato inválido"));
+        }
+        return userRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(new NoSuchElementException("Usuario no encontrado")));
     }
 
     private Mono<User> validateEmailNotExists(User user) {

@@ -56,4 +56,15 @@ public class UserHandler {
                         .bodyValue(savedUser));
     }
 
+    public Mono<ServerResponse> findByEmail(ServerRequest request) {
+        log.info("➡️ Ejecutando findByEmail() de UserHandler");
+        return Mono.justOrEmpty(request.queryParam("email"))
+                .switchIfEmpty(Mono.error(new IllegalArgumentException("El campo 'email' es obligatorio")))
+                .flatMap(userUseCase::findByEmail)
+                .map(userDTOMapper::toResponse)
+                .flatMap(user -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(user));
+    }
+
 }

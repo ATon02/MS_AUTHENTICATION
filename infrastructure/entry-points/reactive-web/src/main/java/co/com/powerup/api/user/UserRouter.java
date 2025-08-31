@@ -23,6 +23,8 @@ public class UserRouter {
                 .filter(filter.requireRole(List.of("admin","asesor")));
         RouterFunction<ServerResponse> saveAdmin = route(POST("/api/v1/users/admin"), userhandler::saveUserAdmin)
                 .filter(filter.requireRole(List.of("admin")));
-        return find.and(save).and(saveAdmin);
+        RouterFunction<ServerResponse> findByEmail = route(GET("/api/v1/users/find-by-email"), userhandler::findByEmail)
+                .filter(filter.requireRole(List.of("admin","asesor")));
+        return find.and(save).and(saveAdmin).and(findByEmail);
     }
 }
