@@ -1,11 +1,11 @@
 package co.com.powerup.usecase.auth;
 
+import co.com.powerup.model.accesstoken.gateways.AccessTokenRepository;
+import co.com.powerup.model.passwordencoder.gateways.PasswordEncoderRepository;
 import co.com.powerup.model.role.Role;
 import co.com.powerup.model.role.gateways.RoleRepository;
 import co.com.powerup.model.user.User;
 import co.com.powerup.model.user.gateways.UserRepository;
-import co.com.powerup.usecase.passwordencoder.PasswordEncoderUseCase;
-import co.com.powerup.usecase.tokenservice.TokenUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,10 +26,10 @@ class AuthUseCaseTest {
     private RoleRepository roleRepository;
 
     @Mock
-    private TokenUseCase tokenUseCase;
+    private AccessTokenRepository accessTokenRepository;
 
     @Mock
-    private PasswordEncoderUseCase passwordEncoderService;
+    private PasswordEncoderRepository passwordEncoderRepository;
 
     @InjectMocks
     private AuthUseCase authUseCase;
@@ -92,7 +92,7 @@ class AuthUseCaseTest {
     @Test
     void login_whenPasswordDoesNotMatch_shouldReturnError() {
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.just(validUser));
-        when(passwordEncoderService.matches("wrongPass", validUser.getPassword())).thenReturn(Mono.just(false));
+        when(passwordEncoderRepository.matches("wrongPass", validUser.getPassword())).thenReturn(Mono.just(false));
 
         StepVerifier.create(authUseCase.login(validUser.getEmail(), "wrongPass"))
                 .expectErrorMatches(ex -> ex instanceof IllegalArgumentException &&
@@ -103,7 +103,7 @@ class AuthUseCaseTest {
     @Test
     void login_whenRoleNotFound_shouldReturnError() {
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.just(validUser));
-        when(passwordEncoderService.matches("123", validUser.getPassword())).thenReturn(Mono.just(true));
+        when(passwordEncoderRepository.matches("123", validUser.getPassword())).thenReturn(Mono.just(true));
         when(roleRepository.findById(validUser.getRoleId())).thenReturn(Mono.empty());
 
         StepVerifier.create(authUseCase.login(validUser.getEmail(), "123"))
@@ -115,15 +115,15 @@ class AuthUseCaseTest {
     @Test
     void login_whenValidCredentials_shouldReturnToken() {
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.just(validUser));
-        when(passwordEncoderService.matches("123", validUser.getPassword())).thenReturn(Mono.just(true));
+        when(passwordEncoderRepository.matches("123", validUser.getPassword())).thenReturn(Mono.just(true));
         when(roleRepository.findById(validUser.getRoleId())).thenReturn(Mono.just(validRole));
-        when(tokenUseCase.generateToken(validUser, validRole)).thenReturn(Mono.just("jwt-token-123"));
+        when(accessTokenRepository.generateToken(validUser, validRole)).thenReturn(Mono.just("jwt-token-123"));
 
         StepVerifier.create(authUseCase.login(validUser.getEmail(), "123"))
                 .expectNext("jwt-token-123")
                 .verifyComplete();
 
-        verify(tokenUseCase).generateToken(validUser, validRole);
+        verify(accessTokenRepository).generateToken(validUser, validRole);
     }
 }
 

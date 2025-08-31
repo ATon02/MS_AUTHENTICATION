@@ -1,9 +1,9 @@
 package co.com.powerup.usecase.auth;
 
+import co.com.powerup.model.accesstoken.gateways.AccessTokenRepository;
+import co.com.powerup.model.passwordencoder.gateways.PasswordEncoderRepository;
 import co.com.powerup.model.role.gateways.RoleRepository;
 import co.com.powerup.model.user.gateways.UserRepository;
-import co.com.powerup.usecase.passwordencoder.PasswordEncoderUseCase;
-import co.com.powerup.usecase.tokenservice.TokenUseCase;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -13,8 +13,8 @@ public class AuthUseCase implements IAuthUseCase {
     
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final TokenUseCase tokenUseCase;
-    private final PasswordEncoderUseCase passwordEncoderService;
+    private final AccessTokenRepository accessTokenRepository;
+    private final PasswordEncoderRepository passwordEncoderRepository;
 
     @Override
     public Mono<String> login(String email, String password) {
@@ -28,14 +28,14 @@ public class AuthUseCase implements IAuthUseCase {
         return userRepository.findByEmail(email)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("Usuario no existente")))
                 .flatMap(user ->
-                    passwordEncoderService.matches(password, user.getPassword())
+                    passwordEncoderRepository.matches(password, user.getPassword())
                         .flatMap(matches -> {
                             if (!matches) {
                                 return Mono.error(new IllegalArgumentException("Contraseña incorrecta"));
                             }
                             return roleRepository.findById(user.getRoleId())
                                     .switchIfEmpty(Mono.error(new IllegalArgumentException("Rol no encontrado para el usuario")))
-                                    .flatMap(role -> tokenUseCase.generateToken(user, role));
+                                    .flatMap(role -> accessTokenRepository.generateToken(user, role));
                         })
                 );
     }

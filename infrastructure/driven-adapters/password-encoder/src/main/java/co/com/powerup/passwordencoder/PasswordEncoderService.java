@@ -1,14 +1,15 @@
 package co.com.powerup.passwordencoder;
 
 import org.springframework.stereotype.Component;
-import co.com.powerup.usecase.passwordencoder.PasswordEncoderUseCase;
+
+import co.com.powerup.model.passwordencoder.gateways.PasswordEncoderRepository;
 import reactor.core.publisher.Mono;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 
 @Component
-public class PasswordEncoderService implements PasswordEncoderUseCase {
+public class PasswordEncoderService implements PasswordEncoderRepository {
 
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

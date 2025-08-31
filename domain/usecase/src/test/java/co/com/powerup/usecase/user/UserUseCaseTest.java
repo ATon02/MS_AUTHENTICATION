@@ -1,10 +1,10 @@
 package co.com.powerup.usecase.user;
 
+import co.com.powerup.model.passwordencoder.gateways.PasswordEncoderRepository;
 import co.com.powerup.model.role.Role;
 import co.com.powerup.model.role.gateways.RoleRepository;
 import co.com.powerup.model.user.User;
 import co.com.powerup.model.user.gateways.UserRepository;
-import co.com.powerup.usecase.passwordencoder.PasswordEncoderUseCase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +17,8 @@ import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.NoSuchElementException;
+
 @ExtendWith(MockitoExtension.class)
 class UserUseCaseTest {
 
@@ -27,7 +29,7 @@ class UserUseCaseTest {
     private RoleRepository roleRepository;
 
     @Mock
-    private PasswordEncoderUseCase passwordEncoderService;
+    private PasswordEncoderRepository passwordEncoderRepository;
 
     @InjectMocks
     private UserUseCase userUseCase;
@@ -47,7 +49,7 @@ class UserUseCaseTest {
 
     @Test
     void saveUser_whenValidUser_shouldSaveSuccessfully() {
-        when(passwordEncoderService.encode(validUser.getPassword())).thenReturn(Mono.just("encoded123"));
+        when(passwordEncoderRepository.encode(validUser.getPassword())).thenReturn(Mono.just("encoded123"));
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.empty());
         when(userRepository.saveTransactional(any(User.class)))
                 .thenAnswer(inv -> Mono.just(inv.getArgument(0)));
@@ -55,14 +57,14 @@ class UserUseCaseTest {
                 .expectNextMatches(user -> user.getEmail().equals("anderson@example.com") &&
                         user.getPassword().equals("encoded123"))
                 .verifyComplete();
-        verify(passwordEncoderService).encode("123456");
+        verify(passwordEncoderRepository).encode("123456");
         verify(userRepository).findByEmail(validUser.getEmail());
         verify(userRepository).saveTransactional(any(User.class));
     }
 
     @Test
     void saveUser_whenEmailAlreadyExists_shouldReturnError() {
-        when(passwordEncoderService.encode(any())).thenReturn(Mono.just("encoded123"));
+        when(passwordEncoderRepository.encode(any())).thenReturn(Mono.just("encoded123"));
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.just(validUser));
         StepVerifier.create(userUseCase.saveUser(validUser))
                 .expectErrorMatches(ex -> ex instanceof IllegalArgumentException &&
@@ -74,7 +76,7 @@ class UserUseCaseTest {
 
     @Test
     void saveUserAdmin_whenRoleExists_shouldSaveSuccessfully() {
-        when(passwordEncoderService.encode(validUser.getPassword())).thenReturn(Mono.just("encoded123"));
+        when(passwordEncoderRepository.encode(validUser.getPassword())).thenReturn(Mono.just("encoded123"));
         when(roleRepository.findById(validUser.getRoleId()))
                 .thenReturn(Mono.just(new Role(3L, "Admin", "Administrador")));
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.empty());
@@ -90,7 +92,7 @@ class UserUseCaseTest {
 
     @Test
     void saveUserAdmin_whenRoleDoesNotExist_shouldReturnError() {
-        when(passwordEncoderService.encode(any())).thenReturn(Mono.just("encoded123"));
+        when(passwordEncoderRepository.encode(any())).thenReturn(Mono.just("encoded123"));
         when(userRepository.findByEmail(validUser.getEmail())).thenReturn(Mono.empty());
         when(roleRepository.findById(validUser.getRoleId())).thenReturn(Mono.empty());
         StepVerifier.create(userUseCase.saveUserAdmin(validUser))
@@ -230,5 +232,54 @@ class UserUseCaseTest {
                         ex.getMessage().equals("El campo 'password' es obligatorio"))
                 .verify();
         verify(userRepository, never()).saveTransactional(any());
+    }
+
+    @Test
+    void testFindByEmail_emailIsNull() {
+        StepVerifier.create(userUseCase.findByEmail(null))
+                .expectErrorMatches(e -> e instanceof IllegalArgumentException &&
+                        e.getMessage().equals("El campo 'email' es obligatorio"))
+                .verify();
+    }
+
+    @Test
+    void testFindByEmail_emailIsBlank() {
+        StepVerifier.create(userUseCase.findByEmail("   "))
+                .expectErrorMatches(e -> e instanceof IllegalArgumentException &&
+                        e.getMessage().equals("El campo 'email' es obligatorio"))
+                .verify();
+    }
+
+    @Test
+    void testFindByEmail_emailInvalidFormat() {
+        StepVerifier.create(userUseCase.findByEmail("correo-invalido"))
+                .expectErrorMatches(e -> e instanceof IllegalArgumentException &&
+                        e.getMessage().equals("El email tiene un formato inválido"))
+                .verify();
+    }
+
+    @Test
+    void testFindByEmail_userNotFound() {
+        String email = "noexiste@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Mono.empty());
+
+        StepVerifier.create(userUseCase.findByEmail(email))
+                .expectErrorMatches(e -> e instanceof NoSuchElementException &&
+                        e.getMessage().equals("Usuario no encontrado"))
+                .verify();
+    }
+
+    @Test
+    void testFindByEmail_userFound() {
+        String email = "juan.perez@example.com";
+        User user = new User();
+        user.setEmail(email);
+        user.setName("Juan Pérez");
+
+        when(userRepository.findByEmail(email)).thenReturn(Mono.just(user));
+
+        StepVerifier.create(userUseCase.findByEmail(email))
+                .expectNextMatches(u -> u.getEmail().equals(email) && u.getName().equals("Juan Pérez"))
+                .verifyComplete();
     }
 }

@@ -5,15 +5,15 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import co.com.powerup.model.accesstoken.gateways.AccessTokenRepository;
 import co.com.powerup.model.role.Role;
 import co.com.powerup.model.user.User;
-import co.com.powerup.usecase.tokenservice.TokenUseCase;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import reactor.core.publisher.Mono;
 
 @Component
-public class JwtTokenService implements TokenUseCase {
+public class JwtTokenService implements AccessTokenRepository {
 
     @Value("${SPRING_SECRET_KEY}")
     private String secretKey;

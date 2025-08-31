@@ -2,10 +2,10 @@ package co.com.powerup.usecase.user;
 
 import java.util.NoSuchElementException;
 
+import co.com.powerup.model.passwordencoder.gateways.PasswordEncoderRepository;
 import co.com.powerup.model.role.gateways.RoleRepository;
 import co.com.powerup.model.user.User;
 import co.com.powerup.model.user.gateways.UserRepository;
-import co.com.powerup.usecase.passwordencoder.PasswordEncoderUseCase;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,7 +15,7 @@ public class UserUseCase implements IUserUseCase {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PasswordEncoderUseCase passwordEncoderService;
+    private final PasswordEncoderRepository passwordEncoderRepository;
 
     @Override
     public Mono<User> saveUser(User user) {
@@ -85,7 +85,7 @@ public class UserUseCase implements IUserUseCase {
                     if (userSave.getPassword() == null || userSave.getPassword().isBlank()) {
                         return Mono.error(new IllegalArgumentException("El campo 'password' es obligatorio"));
                     }
-                    return passwordEncoderService.encode(userSave.getPassword())
+                    return passwordEncoderRepository.encode(userSave.getPassword())
                             .map(encoded -> {
                                 userSave.setPassword(encoded);
                                 return userSave;
