@@ -149,7 +149,32 @@ public class OpenApiConfig {
                                                             new io.swagger.v3.oas.models.media.MediaType()
                                                                     .schema(new Schema<>().$ref(
                                                                             "#/components/schemas/UserResponse")))))));  
-            openApi.path("/api/v1/users/find-by-email", userFindByEmailPath);                                         
+            openApi.path("/api/v1/users/find-by-email", userFindByEmailPath);    
+            PathItem saveAdminPath = new PathItem()
+                    .post(new Operation()
+                            .operationId("saveUserAdmin")
+                            .tags(List.of("User"))
+                            .summary("Crea un nuevo usuario como administrador")
+                            .description("Este endpoint permite crear usuarios únicamente por administradores. ")
+                            .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                            .requestBody(new RequestBody()
+                                    .description("DTO para crear un usuario con rol admin o asesor")
+                                    .required(true)
+                                    .content(new Content()
+                                            .addMediaType("application/json",
+                                                    new io.swagger.v3.oas.models.media.MediaType()
+                                                            .schema(new Schema<>()
+                                                                    .$ref("#/components/schemas/UserCreateDTOAdmin")))))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Usuario administrador creado")
+                                            .content(new Content()
+                                                    .addMediaType("application/json",
+                                                            new io.swagger.v3.oas.models.media.MediaType()
+                                                                    .schema(new Schema<>().$ref(
+                                                                            "#/components/schemas/UserResponse")))))));
+
+            openApi.path("/api/v1/users/admin", saveAdminPath);                                     
             // PATHS DE AUTH
             PathItem loginPath = new PathItem()
                     .post(new Operation()
@@ -228,6 +253,17 @@ public class OpenApiConfig {
                             .addProperty("email", new StringSchema())
                             .addProperty("password", new StringSchema().format("password"))
                             .addProperty("baseSalary", new NumberSchema().format("double"))
+                            .addProperty("roleId", new IntegerSchema().format("int64")))
+                    .addSchemas("UserCreateDTOAdmin", new Schema<UserCreateDTO>()
+                            .addProperty("name", new StringSchema())
+                            .addProperty("lastName", new StringSchema())
+                            .addProperty("dateOfBirth", new StringSchema().format("date"))
+                            .addProperty("address", new StringSchema())
+                            .addProperty("phone", new StringSchema())
+                            .addProperty("email", new StringSchema())
+                            .addProperty("password", new StringSchema().format("password"))
+                            .addProperty("baseSalary", new NumberSchema().format("double"))
+                            .addProperty("roleId", new IntegerSchema().format("int64"))
                             .addProperty("roleId", new IntegerSchema().format("int64")))
                     .addSchemas("UserResponse", new Schema<UserResponse>()
                             .addProperty("idUser", new IntegerSchema().format("int64"))
