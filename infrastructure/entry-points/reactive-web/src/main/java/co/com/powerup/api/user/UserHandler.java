@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 import co.com.powerup.api.dtos.request.UserCreateDTO;
 import co.com.powerup.api.mapper.UserDTOMapper;
 import co.com.powerup.usecase.user.IUserUseCase;
+import io.jsonwebtoken.Claims;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -20,7 +21,6 @@ public class UserHandler {
     
     private  final IUserUseCase userUseCase;
     private  final UserDTOMapper userDTOMapper;
-//private  final UseCase2 useCase2;
 
     public Mono<ServerResponse> find(ServerRequest serverRequest) {
         log.info("➡️ Ejecutando find() de UserHandler");
@@ -61,6 +61,18 @@ public class UserHandler {
         return Mono.justOrEmpty(request.queryParam("email"))
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El campo 'email' es obligatorio")))
                 .flatMap(userUseCase::findByEmail)
+                .map(userDTOMapper::toResponse)
+                .flatMap(user -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(user));
+    }
+
+    @SuppressWarnings("null")
+    public Mono<ServerResponse> selfSearch(ServerRequest request) {
+        log.info("➡️ Ejecutando selfSearch() de UserHandler");
+        Claims claims = (Claims) request.exchange().getAttribute("claims");
+        String emailSub = claims.getSubject();
+        return userUseCase.findByEmail(emailSub)
                 .map(userDTOMapper::toResponse)
                 .flatMap(user -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)

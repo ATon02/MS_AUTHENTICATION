@@ -174,7 +174,22 @@ public class OpenApiConfig {
                                                                     .schema(new Schema<>().$ref(
                                                                             "#/components/schemas/UserResponse")))))));
 
-            openApi.path("/api/v1/users/admin", saveAdminPath);                                     
+            openApi.path("/api/v1/users/admin", saveAdminPath);    
+            PathItem userFindByEmailPathSelf = new PathItem()
+                    .get(new Operation()
+                            .operationId("findUserByEmailSelf")
+                            .tags(List.of("User"))
+                            .summary("Obtiene un usuario por su email extraido del token")
+                            .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                            .responses(new ApiResponses()
+                                    .addApiResponse("200", new ApiResponse()
+                                            .description("Usuario encontrado")
+                                            .content(new Content()
+                                                    .addMediaType("application/json",
+                                                            new io.swagger.v3.oas.models.media.MediaType()
+                                                                    .schema(new Schema<>().$ref(
+                                                                            "#/components/schemas/UserResponse")))))));  
+            openApi.path("/api/v1/users/find-by-email/self", userFindByEmailPathSelf);                                     
             // PATHS DE AUTH
             PathItem loginPath = new PathItem()
                     .post(new Operation()
