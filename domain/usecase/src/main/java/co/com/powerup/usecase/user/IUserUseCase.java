@@ -10,5 +10,6 @@ public interface IUserUseCase {
     Mono<User> saveUserAdmin(User user);
     Flux<User> findAll();
     Mono<User> findByEmail(String email);
+    Flux<User> findByRole(Long roleId);
 
 }

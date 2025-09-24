@@ -26,10 +26,25 @@ public class JwtAuthenticationFilter implements WebFilter {
     @Value("${SPRING_SECRET_KEY}")
     private String secretKey;
 
+    @Value("${SPRING_INTERNAL_JOB_TOKEN}")
+    private String jobToken;
+
     @SuppressWarnings({ "null", "deprecation" })
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+
+        if (path.startsWith("/api/v1/users/find-by-role")) {
+            String token = exchange.getRequest().getHeaders().getFirst("X-Job-Token");
+
+            if (jobToken.equals(token)) {
+                return chain.filter(exchange);
+            } else {
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return Mono.error(new UnauthorizedException("Token de authorizacion invalido"));
+            }
+        }
+
         if (path.startsWith("/api/v1/login") || path.startsWith("/webjars/swagger-ui") || path.startsWith("/v3/api-docs")
                 || path.startsWith("/swagger-ui.html") || path.startsWith("/actuator")) {
             return chain.filter(exchange);

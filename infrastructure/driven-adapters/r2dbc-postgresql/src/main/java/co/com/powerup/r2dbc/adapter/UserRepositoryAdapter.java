@@ -5,6 +5,7 @@ import co.com.powerup.model.user.gateways.UserRepository;
 import co.com.powerup.r2dbc.entity.UserEntity;
 import co.com.powerup.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.powerup.r2dbc.repository.UserReactiveRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.reactivecommons.utils.ObjectMapper;
@@ -45,6 +46,12 @@ public class UserRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Mono<User> findByEmail(String email) {
         return repository.findByEmail(email)
+                         .map(entity -> mapper.map(entity, User.class));
+    }
+
+    @Override
+    public Flux<User> findByRoleId(Long roleId) {
+        return repository.findByRoleId(roleId)
                          .map(entity -> mapper.map(entity, User.class));
     }
 

@@ -22,7 +22,7 @@ public class AuthHandler {
     private  final IAuthUseCase authUseCase; ;
 
     public Mono<ServerResponse> login(ServerRequest serverRequest) {
-        log.info("➡️ Ejecutando login() de AuthHandler");
+        log.info(" Ejecutando login() de AuthHandler");
         return serverRequest.bodyToMono(LoginRequest.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El body no puede ser null")))
                 .flatMap(loginRequest -> 

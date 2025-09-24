@@ -9,4 +9,6 @@ public interface UserRepository {
     Mono<User> saveTransactional(User user);
     Mono<User> findByEmail(String email);
     Flux<User> findAll();
+    Flux<User> findByRoleId(Long roleId);
+
 }

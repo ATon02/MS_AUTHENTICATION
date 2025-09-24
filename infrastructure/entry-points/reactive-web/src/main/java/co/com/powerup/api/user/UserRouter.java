@@ -27,6 +27,7 @@ public class UserRouter {
                 .filter(filter.requireRole(List.of("admin","asesor")));
         RouterFunction<ServerResponse> selfSearch = route(GET("/api/v1/users/find-by-email/self"), userhandler::selfSearch)
                 .filter(filter.requireRole(List.of("admin","asesor","cliente")));
-        return find.and(save).and(saveAdmin).and(findByEmail).and(selfSearch);
+        RouterFunction<ServerResponse> findByRole = route(GET("/api/v1/users/find-by-role"), userhandler::findByRole);
+        return find.and(save).and(saveAdmin).and(findByEmail).and(selfSearch).and(findByRole);
     }
 }

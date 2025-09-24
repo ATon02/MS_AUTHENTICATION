@@ -12,7 +12,7 @@ public class RoleUseCase implements IRoleUseCase {
 
     @Override
     public Mono<Role> saveRole(Role role) {
-        System.out.println("➡️ Ejecutando saveRole de  RoleUseCase con el user: " + role.toString());
+        System.out.println(" Ejecutando saveRole de  RoleUseCase con el user: " + role.toString());
         if (role.getName() == null || role.getName().isBlank()) {
             return Mono.error(new IllegalArgumentException("El campo 'name' es obligatorio"));
         }

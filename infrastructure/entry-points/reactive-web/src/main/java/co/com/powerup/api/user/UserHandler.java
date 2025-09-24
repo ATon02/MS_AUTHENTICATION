@@ -23,7 +23,7 @@ public class UserHandler {
     private  final UserDTOMapper userDTOMapper;
 
     public Mono<ServerResponse> find(ServerRequest serverRequest) {
-        log.info("➡️ Ejecutando find() de UserHandler");
+        log.info(" Ejecutando find() de UserHandler");
         return userUseCase.findAll()
                 .map(userDTOMapper::toResponse)
                 .collectList()
@@ -33,7 +33,7 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> saveUser(ServerRequest serverRequest) {
-        log.info("➡️ Ejecutando saveUser() de UserHandler");
+        log.info(" Ejecutando saveUser() de UserHandler");
         return serverRequest.bodyToMono(UserCreateDTO.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El body no puede ser null")))
                 .map(userDTOMapper::toModel)
@@ -45,7 +45,7 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> saveUserAdmin(ServerRequest serverRequest) {
-        log.info("➡️ Ejecutando saveUserAdmin() de UserHandler");
+        log.info(" Ejecutando saveUserAdmin() de UserHandler");
         return serverRequest.bodyToMono(UserCreateDTO.class)
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El body no puede ser null")))
                 .map(userDTOMapper::toModel)
@@ -57,7 +57,7 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> findByEmail(ServerRequest request) {
-        log.info("➡️ Ejecutando findByEmail() de UserHandler");
+        log.info(" Ejecutando findByEmail() de UserHandler");
         return Mono.justOrEmpty(request.queryParam("email"))
                 .switchIfEmpty(Mono.error(new IllegalArgumentException("El campo 'email' es obligatorio")))
                 .flatMap(userUseCase::findByEmail)
@@ -69,7 +69,7 @@ public class UserHandler {
 
     @SuppressWarnings("null")
     public Mono<ServerResponse> selfSearch(ServerRequest request) {
-        log.info("➡️ Ejecutando selfSearch() de UserHandler");
+        log.info(" Ejecutando selfSearch() de UserHandler");
         Claims claims = (Claims) request.exchange().getAttribute("claims");
         String emailSub = claims.getSubject();
         return userUseCase.findByEmail(emailSub)
@@ -77,6 +77,19 @@ public class UserHandler {
                 .flatMap(user -> ServerResponse.ok()
                         .contentType(MediaType.APPLICATION_JSON)
                         .bodyValue(user));
+    }
+
+    public Mono<ServerResponse> findByRole(ServerRequest serverRequest) {
+        log.info(" Ejecutando findByRole() de UserHandler");
+        Long roleId = serverRequest.queryParam("roleId")
+                .map(Long::parseLong)
+                .orElseThrow(() -> new IllegalArgumentException("roleId es requerido"));
+        return userUseCase.findByRole(roleId)
+                .map(userDTOMapper::toResponse)
+                .collectList()
+                .flatMap(users -> ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(users));
     }
 
 }

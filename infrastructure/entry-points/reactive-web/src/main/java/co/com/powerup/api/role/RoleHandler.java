@@ -23,7 +23,7 @@ public class RoleHandler {
 
 
     public Mono<ServerResponse> find(ServerRequest serverRequest) {
-        log.info("➡️ Entró al handler find() de RoleHandler");
+        log.info(" Entró al handler find() de RoleHandler");
         return roleUseCase.findAll()
                 .map(roleDTOMapper::toResponse)
                 .collectList()
@@ -33,7 +33,7 @@ public class RoleHandler {
     }
 
     public Mono<ServerResponse> saveRole(ServerRequest serverRequest) {
-        log.info("➡️ Entró al handler saveRole() de RoleHandler");
+        log.info(" Entró al handler saveRole() de RoleHandler");
         return serverRequest.bodyToMono(RoleCreateDTO.class)
             .switchIfEmpty(Mono.error(new IllegalArgumentException("El body no puede ser null")))
             .map(roleDTOMapper::toModel)              

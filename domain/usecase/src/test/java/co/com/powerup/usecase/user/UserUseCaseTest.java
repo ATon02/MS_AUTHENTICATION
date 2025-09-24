@@ -282,4 +282,13 @@ class UserUseCaseTest {
                 .expectNextMatches(u -> u.getEmail().equals(email) && u.getName().equals("Juan Pérez"))
                 .verifyComplete();
     }
+
+     @Test
+    void findByRole_shouldReturnUsers() {
+        when(userRepository.findByRoleId(3L)).thenReturn(Flux.just(validUser));
+        StepVerifier.create(userUseCase.findByRole(3L))
+                .expectNext(validUser)
+                .verifyComplete();
+        verify(userRepository).findByRoleId(3L);
+    }
 }

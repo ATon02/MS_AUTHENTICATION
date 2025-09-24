@@ -19,7 +19,7 @@ public class UserUseCase implements IUserUseCase {
 
     @Override
     public Mono<User> saveUser(User user) {
-        System.out.println("➡️ Ejecutando saveUser con user: " + user);
+        System.out.println(" Ejecutando saveUser con user: " + user);
         user.setRoleId(3L);
         return validUser(user)
                 .flatMap(userSave -> validateEmailNotExists(userSave)
@@ -33,7 +33,7 @@ public class UserUseCase implements IUserUseCase {
 
     @Override
     public Mono<User> saveUserAdmin(User user) {
-        System.out.println("➡️ Ejecutando saveUserAdmin con user: " + user);
+        System.out.println(" Ejecutando saveUserAdmin con user: " + user);
         return validUser(user)
                 .flatMap(userSave -> validateEmailNotExists(userSave)
                         .flatMap(u -> roleRepository.findById(u.getRoleId())
@@ -91,6 +91,11 @@ public class UserUseCase implements IUserUseCase {
                                 return userSave;
                             });
                 });
+    }
+
+    @Override
+    public Flux<User> findByRole(Long roleId) {
+        return userRepository.findByRoleId(roleId);
     }
 
 }
